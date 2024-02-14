@@ -8,6 +8,26 @@ Harpoon 2.
 
 ![example image showing tabline](assets/tabline.png)
 
+## Installation
+
+Using [lazy.nvim](https://github.com/folke/lazy.nvim)
+
+```lua
+{
+    "jasonpanosso/harpoon-tabline.nvim",
+    dependencies = { "ThePrimeagen/harpoon" }
+}
+```
+
+Using [packer](https://github.com/wbthomason/packer.nvim):
+
+```lua
+use {
+    "jasonpanosso/harpoon-tabline.nvim",
+    requires = { { "ThePrimeagen/harpoon" } }
+}
+```
+
 ## Setup
 
 Simply call setup after harpoon:
@@ -38,8 +58,7 @@ local config = {
 
 - `tab_prefix`/`tab_suffix`: Defines the prefix/suffix for each tab in your tabline.
 - `use_editor_color_scheme`: Enables/disables setting the highlight groups for
-  the tabline to the default `Tabline`/`TablineSel` highlight groups that your
-  color scheme defines.
+  the tabline to the default tabline highlight groups that your color scheme defines.
 - `format_item_names`: A function that takes in the list of harpoon marks/list
   items, and returns a string array that will be used as the content for the
   tabline. By default, this shortens the filepaths to the filename, unless there
