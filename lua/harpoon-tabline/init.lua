@@ -2,89 +2,62 @@ local has_harpoon, harpoon = pcall(require, "harpoon")
 if not has_harpoon then
     error("harpoon-tabline.nvim requires ThePrimeagen/harpoon")
 end
+local has_extensions, _ = pcall(require, "harpoon.extensions")
+if not has_extensions then
+    error("Unable to find harpoon.extensions while initing harpoon-tabline.nvim. Are you using Harpoon 2?")
+end
+local utils = require("harpoon-tabline.utils")
 
 ---@class HarpoonTabline
 local M = {}
 
 ---@class Config
----@field tabline_prefix string?
----@field tabline_suffix string?
+---@field tab_prefix? string
+---@field tab_suffix? string
+---@field use_editor_color_scheme? boolean
+---@field format_item_names? (fun(list: {value: any}): string[])
 local config = {
-    tabline_prefix = "   ",
-    tabline_suffix = "   ",
+    tab_prefix = " ",
+    tab_suffix = " ",
+    use_editor_color_scheme = true,
+    format_item_names = utils.shorten_list_item_names,
 }
 
 ---@type Config
 M.config = config
-
-local function get_color(group, attr)
-    return vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(group)), attr)
-end
-
-local function shorten_list_item_names(list)
-    local shortened = {}
-
-    local counts = {}
-    for _, list_item in ipairs(list) do
-        local name = vim.fn.fnamemodify(list_item.value, ":t")
-        counts[name] = (counts[name] or 0) + 1
-    end
-
-    for _, file in ipairs(list) do
-        local name = vim.fn.fnamemodify(file.value, ":t")
-
-        if counts[name] == 1 then
-            table.insert(shortened, { value = file.value, shortened = vim.fn.fnamemodify(name, ":t") })
-        else
-            table.insert(shortened, { value = file.value, shortened = file.value })
-        end
-    end
-
-    return shortened
-end
 
 ---@param args Config?
 M.setup = function(args)
     M.config = vim.tbl_deep_extend("force", M.config, args or {})
 
     function _G.tabline()
-        local items = shorten_list_item_names(harpoon:list().items)
+        local list = harpoon:list()
+        local items_shortened = M.config.format_item_names(list.items)
         local tabline = ""
 
-        local root = harpoon.config.default.get_root_dir()
-        local current_buffer = vim.api.nvim_buf_get_name(0)
-        for i, item in ipairs(items) do
-            local is_current = current_buffer == root .. "/" .. item.value
+        local cur_bufnr = vim.api.nvim_get_current_buf()
+        local cur_buf_path = vim.api.nvim_buf_get_name(cur_bufnr)
+        local cur_buf_abs_path = utils.get_abs_path(cur_buf_path)
+        for i, item in ipairs(items_shortened) do
+            local is_cur_buf = cur_buf_abs_path == utils.get_abs_path(list.items[i].value)
 
-            local label
-            if item.shortened == "" or item.shortened == "(empty)" then
-                label = "(empty)"
-                is_current = false
-            else
-                label = item.shortened
+            local num_highlight_group = "%#" .. (is_cur_buf and "HarpoonNumberActive" or "HarpoonNumberInactive") .. "#"
+            local item_highlight_group = "%#" .. (is_cur_buf and "HarpoonActive" or "HarpoonInactive") .. "#"
+
+            local tab = num_highlight_group
+                .. M.config.tab_prefix
+                .. i
+                .. " %*"
+                .. item_highlight_group
+                .. item
+                .. M.config.tab_suffix
+                .. "%*"
+
+            if i < #items_shortened then
+                tab = tab .. "%T"
             end
 
-            if is_current then
-                tabline = tabline
-                    .. "%#HarpoonNumberActive#"
-                    .. M.config.tabline_prefix
-                    .. i
-                    .. " %*"
-                    .. "%#HarpoonActive#"
-            else
-                tabline = tabline
-                    .. "%#HarpoonNumberInactive#"
-                    .. M.config.tabline_prefix
-                    .. i
-                    .. " %*"
-                    .. "%#HarpoonInactive#"
-            end
-
-            tabline = tabline .. label .. M.config.tabline_suffix .. "%*"
-
-            if i < #items then
-                tabline = tabline .. "%T"
-            end
+            tabline = tabline .. tab
         end
 
         return tabline
@@ -92,22 +65,30 @@ M.setup = function(args)
 
     vim.opt.showtabline = 2
 
-    vim.o.tabline = "%!v:lua.tabline()"
+    vim.opt.tabline = "%!v:lua.tabline()"
 
-    vim.api.nvim_create_autocmd("ColorScheme", {
-        group = vim.api.nvim_create_augroup("harpoon", { clear = true }),
-        pattern = { "*" },
-        callback = function()
-            local color = get_color("HarpoonActive", "bg#")
-
-            if color == "" or color == nil then
-                vim.api.nvim_set_hl(0, "HarpoonInactive", { link = "Tabline" })
-                vim.api.nvim_set_hl(0, "HarpoonActive", { link = "TablineSel" })
-                vim.api.nvim_set_hl(0, "HarpoonNumberActive", { link = "TablineSel" })
-                vim.api.nvim_set_hl(0, "HarpoonNumberInactive", { link = "Tabline" })
-            end
+    -- by default, harpoon:list():append() will not trigger a tabline update,
+    -- and for some reason vim.cmd.redrawtabline() does not work here. Resetting
+    -- vim.op.tabline does though! X)
+    harpoon:extend({
+        ADD = function()
+            vim.opt.tabline = "%!v:lua.tabline()"
         end,
     })
+
+    if M.config.use_editor_color_scheme then
+        -- link hl groups in autocmd callback, and immediately link hl groups to
+        -- avoid load order race condition with color scheme plugin
+        utils.link_color_scheme_hl_groups()
+
+        vim.api.nvim_create_autocmd("ColorScheme", {
+            group = vim.api.nvim_create_augroup("harpoon-tabline", { clear = true }),
+            pattern = { "*" },
+            callback = function()
+                utils.link_color_scheme_hl_groups()
+            end,
+        })
+    end
 end
 
 return M
