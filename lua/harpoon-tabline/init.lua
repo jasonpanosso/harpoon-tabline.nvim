@@ -74,6 +74,9 @@ M.setup = function(args)
         ADD = function()
             vim.opt.tabline = "%!v:lua.tabline()"
         end,
+        REMOVE = function()
+            vim.opt.tabline = "%!v:lua.tabline()"
+        end,
     })
 
     if M.config.use_editor_color_scheme then
