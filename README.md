@@ -47,7 +47,7 @@ By default, harpoon-tabline comes with these defaults:
 ---@field tab_prefix? string
 ---@field tab_suffix? string
 ---@field use_editor_color_scheme? boolean
----@field format_item_names? (fun(list: {value: any}): string[])
+---@field format_item_names? (fun(list: HarpoonList): string[])
 local config = {
     tab_prefix = " ",
     tab_suffix = " ",
@@ -59,9 +59,9 @@ local config = {
 - `tab_prefix`/`tab_suffix`: Defines the prefix/suffix for each tab in your tabline.
 - `use_editor_color_scheme`: Enables/disables setting the highlight groups for
   the tabline to the default tabline highlight groups that your color scheme defines.
-- `format_item_names`: A function that takes in the list of harpoon marks/list
-  items, and returns a string array that will be used as the content for the
-  tabline. By default, this shortens the filepaths to the filename, unless there
+- `format_item_names`: A function that takes in a HarpoonList, and returns a
+  string array that will be used as the content for the tabline.
+  By default, this shortens the filepaths to the filename, unless there
   are two matching file names. If there are two matching file names, the file
   path will be used instead.
 
