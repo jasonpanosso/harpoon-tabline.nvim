@@ -32,14 +32,24 @@ M.setup = function(args)
 
     function _G.tabline()
         local list = harpoon:list()
-        local items_shortened = M.config.format_item_names(list.items)
+        local length = list:length()
+        local items_shortened = M.config.format_item_names(list)
         local tabline = ""
 
         local cur_bufnr = vim.api.nvim_get_current_buf()
         local cur_buf_path = vim.api.nvim_buf_get_name(cur_bufnr)
         local cur_buf_abs_path = utils.get_abs_path(cur_buf_path)
-        for i, item in ipairs(items_shortened) do
-            local is_cur_buf = cur_buf_abs_path == utils.get_abs_path(list.items[i].value)
+
+        for i = 1, length do
+            local item = items_shortened[i]
+            local is_cur_buf
+
+            if item == nil then
+                item = "(nil)"
+                is_cur_buf = false
+            else
+                is_cur_buf = cur_buf_abs_path == utils.get_abs_path(list.items[i].value)
+            end
 
             local num_highlight_group = "%#" .. (is_cur_buf and "HarpoonNumberActive" or "HarpoonNumberInactive") .. "#"
             local item_highlight_group = "%#" .. (is_cur_buf and "HarpoonActive" or "HarpoonInactive") .. "#"
