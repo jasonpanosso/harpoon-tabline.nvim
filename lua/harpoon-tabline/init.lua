@@ -15,11 +15,15 @@ local M = {}
 ---@field tab_prefix? string
 ---@field tab_suffix? string
 ---@field use_editor_color_scheme? boolean
+---@field empty_label? string
+---@field hide_empty? boolean
 ---@field format_item_names? (fun(list: {value: any}): string[])
 local config = {
     tab_prefix = " ",
     tab_suffix = " ",
     use_editor_color_scheme = true,
+    empty_label = "(empty)",
+    hide_empty = false,
     format_item_names = utils.shorten_list_item_names,
 }
 
@@ -39,6 +43,7 @@ M.setup = function(args)
         local cur_bufnr = vim.api.nvim_get_current_buf()
         local cur_buf_path = vim.api.nvim_buf_get_name(cur_bufnr)
         local cur_buf_abs_path = utils.get_abs_path(cur_buf_path)
+<<<<<<< Updated upstream
 
         for i = 1, length do
             local item = items_shortened[i]
@@ -50,24 +55,45 @@ M.setup = function(args)
             else
                 is_cur_buf = cur_buf_abs_path == utils.get_abs_path(list.items[i].value)
             end
+=======
+>>>>>>> Stashed changes
 
-            local num_highlight_group = "%#" .. (is_cur_buf and "HarpoonNumberActive" or "HarpoonNumberInactive") .. "#"
-            local item_highlight_group = "%#" .. (is_cur_buf and "HarpoonActive" or "HarpoonInactive") .. "#"
+        for i = 1, length do
+            local item = items_shortened[i]
+            local skip = false
+            local is_cur_buf
 
-            local tab = num_highlight_group
-                .. M.config.tab_prefix
-                .. i
-                .. " %*"
-                .. item_highlight_group
-                .. item
-                .. M.config.tab_suffix
-                .. "%*"
+            if item == nil then
+                if M.config.hide_empty then
+                    skip = true
+                else
+                    item = M.config.empty_label
+                end
 
-            if i < #items_shortened then
-                tab = tab .. "%T"
+                is_cur_buf = false
+            else
+                is_cur_buf = cur_buf_abs_path == utils.get_abs_path(list.items[i].value)
             end
 
-            tabline = tabline .. tab
+            if not skip then
+                local num_highlight_group = "%#" .. (is_cur_buf and "HarpoonNumberActive" or "HarpoonNumberInactive") .. "#"
+                local item_highlight_group = "%#" .. (is_cur_buf and "HarpoonActive" or "HarpoonInactive") .. "#"
+
+                local tab = num_highlight_group
+                    .. M.config.tab_prefix
+                    .. i
+                    .. " %*"
+                    .. item_highlight_group
+                    .. item
+                    .. M.config.tab_suffix
+                    .. "%*"
+
+                if i < #items_shortened then
+                    tab = tab .. "%T"
+                end
+
+                tabline = tabline .. tab
+            end
         end
 
         return tabline
