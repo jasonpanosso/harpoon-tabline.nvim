@@ -47,11 +47,15 @@ By default, harpoon-tabline comes with these defaults:
 ---@field tab_prefix? string
 ---@field tab_suffix? string
 ---@field use_editor_color_scheme? boolean
----@field format_item_names? (fun(list: HarpoonList): string[])
+---@field empty_label? string
+---@field show_empty? boolean
+---@field format_item_names? (fun(list: {value: any}): string[])
 local config = {
     tab_prefix = " ",
     tab_suffix = " ",
     use_editor_color_scheme = true,
+    empty_label = "(empty)",
+    show_empty = true,
     format_item_names = utils.shorten_list_item_names,
 }
 ```
@@ -59,6 +63,8 @@ local config = {
 - `tab_prefix`/`tab_suffix`: Defines the prefix/suffix for each tab in your tabline.
 - `use_editor_color_scheme`: Enables/disables setting the highlight groups for
   the tabline to the default tabline highlight groups that your color scheme defines.
+- `empty_label`: What label to give empty items in the tabline.
+- `show_empty`: Whether to show empty items in the tabline.
 - `format_item_names`: A function that takes in a HarpoonList, and returns a
   string array that will be used as the content for the tabline.
   By default, this shortens the filepaths to the filename, unless there
