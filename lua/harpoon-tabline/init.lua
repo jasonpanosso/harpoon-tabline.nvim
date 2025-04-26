@@ -16,14 +16,14 @@ local M = {}
 ---@field tab_suffix? string
 ---@field use_editor_color_scheme? boolean
 ---@field empty_label? string
----@field hide_empty? boolean
+---@field show_empty? boolean
 ---@field format_item_names? (fun(list: {value: any}): string[])
 local config = {
     tab_prefix = " ",
     tab_suffix = " ",
     use_editor_color_scheme = true,
     empty_label = "(empty)",
-    hide_empty = false,
+    show_empty = true,
     format_item_names = utils.shorten_list_item_names,
 }
 
@@ -50,7 +50,7 @@ M.setup = function(args)
             local is_cur_buf
 
             if item == nil then
-                if M.config.hide_empty then
+                if not M.config.show_empty then
                     skip = true
                 else
                     item = M.config.empty_label
