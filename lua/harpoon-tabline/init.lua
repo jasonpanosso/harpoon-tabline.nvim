@@ -43,20 +43,6 @@ M.setup = function(args)
         local cur_bufnr = vim.api.nvim_get_current_buf()
         local cur_buf_path = vim.api.nvim_buf_get_name(cur_bufnr)
         local cur_buf_abs_path = utils.get_abs_path(cur_buf_path)
-<<<<<<< Updated upstream
-
-        for i = 1, length do
-            local item = items_shortened[i]
-            local is_cur_buf
-
-            if item == nil then
-                item = "(nil)"
-                is_cur_buf = false
-            else
-                is_cur_buf = cur_buf_abs_path == utils.get_abs_path(list.items[i].value)
-            end
-=======
->>>>>>> Stashed changes
 
         for i = 1, length do
             local item = items_shortened[i]
