@@ -50,7 +50,7 @@ M.setup = function(args)
             local is_cur_buf
 
             if item == nil then
-                if not M.config.show_empty then
+                if not M.config.show_empty or length == 1 then
                     skip = true
                 else
                     item = M.config.empty_label
