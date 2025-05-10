@@ -17,7 +17,7 @@ local M = {}
 ---@field use_editor_color_scheme? boolean
 ---@field empty_label? string
 ---@field show_empty? boolean
----@field format_item_names? (fun(list: {value: any}): string[])
+---@field format_item_names? (fun(list: HarpoonList): string[])
 local config = {
     tab_prefix = " ",
     tab_suffix = " ",
@@ -62,7 +62,9 @@ M.setup = function(args)
             end
 
             if not skip then
-                local num_highlight_group = "%#" .. (is_cur_buf and "HarpoonNumberActive" or "HarpoonNumberInactive") .. "#"
+                local num_highlight_group = "%#"
+                    .. (is_cur_buf and "HarpoonNumberActive" or "HarpoonNumberInactive")
+                    .. "#"
                 local item_highlight_group = "%#" .. (is_cur_buf and "HarpoonActive" or "HarpoonInactive") .. "#"
 
                 local tab = num_highlight_group
