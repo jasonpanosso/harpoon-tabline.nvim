@@ -18,6 +18,7 @@ local M = {}
 ---@field empty_label? string
 ---@field show_empty? boolean
 ---@field format_item_names? (fun(list: HarpoonList): string[])
+---@field custom_index_names? string[]
 local config = {
     tab_prefix = " ",
     tab_suffix = " ",
@@ -25,6 +26,7 @@ local config = {
     empty_label = "(empty)",
     show_empty = true,
     format_item_names = utils.shorten_list_item_names,
+    custom_index_names = nil,
 }
 
 ---@type Config
@@ -61,6 +63,14 @@ M.setup = function(args)
                 is_cur_buf = cur_buf_abs_path == utils.get_abs_path(list.items[i].value)
             end
 
+            local ident = tostring(i)
+            if M.config.custom_index_names ~= nil then
+                local custom_idx = M.config.custom_index_names[i]
+                if custom_idx ~= nil then
+                    ident = custom_idx
+                end
+            end
+
             if not skip then
                 local num_highlight_group = "%#"
                     .. (is_cur_buf and "HarpoonNumberActive" or "HarpoonNumberInactive")
@@ -69,7 +79,7 @@ M.setup = function(args)
 
                 local tab = num_highlight_group
                     .. M.config.tab_prefix
-                    .. i
+                    .. ident
                     .. " %*"
                     .. item_highlight_group
                     .. item
